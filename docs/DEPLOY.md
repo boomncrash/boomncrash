@@ -4,7 +4,7 @@ Step-by-step guide to host the Bountly web app on [Netlify](https://www.netlify.
 
 ## Prerequisites
 
-- GitHub repo: [chicoded/boom-crash](https://github.com/chicoded/boom-crash)
+- GitHub repo: [boomncrash/boomncrash](https://github.com/boomncrash/boomncrash)
 - Netlify account
 - Resend account (email alerts + verification)
 - Base Sepolia / Solana devnet wallets for initial testing (mainnet when ready — see [MAINNET.md](./MAINNET.md))
@@ -13,7 +13,7 @@ Step-by-step guide to host the Bountly web app on [Netlify](https://www.netlify.
 
 1. Log in to [Netlify](https://app.netlify.com)
 2. **Add new site → Import an existing project → GitHub**
-3. Select `chicoded/boom-crash`
+3. Select `boomncrash/boomncrash`
 4. Netlify auto-detects settings from `netlify.toml`:
    - **Base directory:** `web`
    - **Build command:** `npm run build:netlify`

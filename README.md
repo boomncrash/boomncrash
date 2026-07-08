@@ -32,7 +32,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Deploy to Netlify
 
 1. Push this repo to GitHub
-2. Connect [chicoded/boom-crash](https://github.com/chicoded/boom-crash) in Netlify
+2. Connect [boomncrash/boomncrash](https://github.com/boomncrash/boomncrash) in Netlify
 3. Enable **Netlify Database**
 4. Set env vars from `web/.env.example`
 5. Deploy — full guide: [docs/DEPLOY.md](docs/DEPLOY.md)
