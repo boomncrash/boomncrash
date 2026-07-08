@@ -1,4 +1,4 @@
-//! Bountly Solana Escrow Program
+//! boomncrash Solana Escrow Program
 //! USDC escrow with 3% platform fee on payout + Rally crowdfunded bounties
 
 use anchor_lang::prelude::*;

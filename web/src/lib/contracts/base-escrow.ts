@@ -1,5 +1,4 @@
 import {
-  createPublicClient,
   createWalletClient,
   custom,
   decodeEventLog,
@@ -7,7 +6,9 @@ import {
   type Address,
   type Hash,
 } from "viem";
-import { baseSepolia } from "viem/chains";
+import { getActiveBaseAddress, getPrivyEthereumProvider } from "@/lib/auth/active-wallet";
+import { createRpcPublicClient } from "@/lib/contracts/embedded-evm";
+import { getBaseViemChain } from "@/lib/wallet-ethereum";
 import { CHAINS } from "@/lib/constants";
 import { bountyEscrowAbi, bountyFactoryAbi, erc20Abi } from "./abis";
 
@@ -28,17 +29,22 @@ export function isEscrowConfigured(): boolean {
   return getFactoryAddress() !== null;
 }
 
+function requireBaseAddress(): Address {
+  const address = getActiveBaseAddress();
+  if (!address) throw new Error("Sign in to use your Base wallet.");
+  return address;
+}
+
 export function getPublicClient() {
-  return createPublicClient({
-    chain: baseSepolia,
-    transport: custom(window.ethereum!),
-  });
+  return createRpcPublicClient();
 }
 
 export function getWalletClient() {
+  const address = requireBaseAddress();
   return createWalletClient({
-    chain: baseSepolia,
-    transport: custom(window.ethereum!),
+    account: address,
+    chain: getBaseViemChain(),
+    transport: custom(getPrivyEthereumProvider()),
   });
 }
 

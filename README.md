@@ -1,4 +1,4 @@
-# Bountly
+# boomncrash
 
 **Fund tasks. Get paid in USDC.**
 

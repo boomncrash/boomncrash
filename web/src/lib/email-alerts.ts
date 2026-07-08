@@ -1,3 +1,5 @@
+import { APP_NAME } from "@/lib/constants";
+
 const RESEND_API = "https://api.resend.com/emails";
 
 export async function sendAdminAlert(subject: string, html: string): Promise<void> {
@@ -14,9 +16,9 @@ export async function sendAdminAlert(subject: string, html: string): Promise<voi
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM ?? "Bountly <onboarding@resend.dev>",
+        from: process.env.EMAIL_FROM ?? `${APP_NAME} <onboarding@resend.dev>`,
         to: [to],
-        subject: `[Bountly] ${subject}`,
+        subject: `[${APP_NAME}] ${subject}`,
         html,
       }),
     });

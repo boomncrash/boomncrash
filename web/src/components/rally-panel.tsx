@@ -35,7 +35,7 @@ export function RallyPanel({ bounty }: RallyPanelProps) {
   const [contributions, setContributions] = useState<RallyContribution[]>([]);
   const [localBounty, setLocalBounty] = useState(bounty);
 
-  const { address, isConnected, isBaseSepolia, switchToBaseSepolia } = useWallet();
+  const { address, isConnected, isOnBaseNetwork, switchToBaseNetwork } = useWallet();
   const {
     publicKey: solanaAddress,
     isConnected: isSolanaConnected,
@@ -83,7 +83,7 @@ export function RallyPanel({ bounty }: RallyPanelProps) {
       let txHash: string | undefined;
 
       if (onChainRally && !isSolana) {
-        if (!isBaseSepolia) await switchToBaseSepolia();
+        if (!isOnBaseNetwork) await switchToBaseNetwork();
         setSuccess("Confirm USDC contribution in your wallet...");
         txHash = await contributeBaseRally({
           bountyId: bounty.id,

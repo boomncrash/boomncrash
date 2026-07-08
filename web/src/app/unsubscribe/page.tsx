@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { APP_NAME } from "@/lib/constants";
 
 function UnsubscribeClient() {
   const searchParams = useSearchParams();
@@ -33,7 +33,7 @@ function UnsubscribeClient() {
       {status === "loading" && <p className="mt-4 text-zinc-400">Processing…</p>}
       {status === "success" && (
         <p className="mt-4 text-emerald-400">
-          {email ? `${email} has been unsubscribed` : "You have been unsubscribed"} from Bountly
+          {email ? `${email} has been unsubscribed` : "You have been unsubscribed"} from {APP_NAME}
           emails. In-app notifications are unchanged.
         </p>
       )}

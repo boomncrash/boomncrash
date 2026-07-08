@@ -4,13 +4,14 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from "react";
-import { Connection, PublicKey, Transaction } from "@solana/web3.js";
-import { getActiveChain } from "@/lib/chain-config";
+import { Connection, Transaction } from "@solana/web3.js";
+import { useSignTransaction as usePrivySignSolanaTransaction } from "@privy-io/react-auth/solana";
+import { getActiveChain, isSolanaMainnet } from "@/lib/chain-config";
+import { useAuth } from "@/components/auth-context";
+import { getPrivySolanaWallet } from "@/lib/auth/active-wallet";
 
 interface SolanaWalletContextValue {
   publicKey: string | null;
@@ -24,75 +25,59 @@ interface SolanaWalletContextValue {
 
 const SolanaWalletContext = createContext<SolanaWalletContextValue | null>(null);
 
-function getPhantomProvider() {
-  if (typeof window === "undefined") return null;
-  const provider = window.solana;
-  if (provider?.isPhantom) return provider;
-  return null;
-}
-
 export function SolanaWalletProvider({ children }: { children: ReactNode }) {
-  const [publicKey, setPublicKey] = useState<string | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
+  const {
+    isAuthenticated,
+    isLoading,
+    primarySolanaAddress,
+    login,
+    logout,
+  } = useAuth();
+  const { signTransaction: privySignTransaction } = usePrivySignSolanaTransaction();
 
   const solanaChain = getActiveChain("solana");
-  const rpcUrl = solanaChain.rpcUrl;
-  const connection = useMemo(() => new Connection(rpcUrl, "confirmed"), [rpcUrl]);
+  const connection = useMemo(
+    () => new Connection(solanaChain.rpcUrl, "confirmed"),
+    [solanaChain.rpcUrl]
+  );
 
-  useEffect(() => {
-    const provider = getPhantomProvider();
-    if (!provider) return;
+  const solanaChainId = isSolanaMainnet() ? "solana:mainnet" : "solana:devnet";
 
-    provider.connect({ onlyIfTrusted: true }).then(
-      (resp: { publicKey: PublicKey }) => setPublicKey(resp.publicKey.toBase58()),
-      () => {}
-    );
+  const signTransaction = useCallback(
+    async (tx: Transaction) => {
+      const wallet = getPrivySolanaWallet();
+      if (!wallet) throw new Error("Sign in to use your Solana wallet.");
 
-    const handleAccountChanged = (key: PublicKey | null) => {
-      setPublicKey(key?.toBase58() ?? null);
-    };
+      const serialized = tx.serialize({
+        requireAllSignatures: false,
+        verifySignatures: false,
+      });
 
-    provider.on?.("accountChanged", handleAccountChanged);
-    return () => {
-      provider.removeListener?.("accountChanged", handleAccountChanged);
-    };
-  }, []);
+      const { signedTransaction } = await privySignTransaction({
+        transaction: serialized,
+        wallet,
+        chain: solanaChainId,
+      });
+
+      return Transaction.from(signedTransaction);
+    },
+    [privySignTransaction, solanaChainId]
+  );
 
   const connect = useCallback(async () => {
-    const provider = getPhantomProvider();
-    if (!provider) {
-      window.open("https://phantom.app/", "_blank");
-      throw new Error("Install Phantom wallet to connect on Solana.");
-    }
-    setIsConnecting(true);
-    try {
-      const resp = await provider.connect();
-      setPublicKey(resp.publicKey.toBase58());
-    } finally {
-      setIsConnecting(false);
-    }
-  }, []);
+    await login();
+  }, [login]);
 
-  const disconnect = useCallback(async () => {
-    const provider = getPhantomProvider();
-    await provider?.disconnect?.();
-    setPublicKey(null);
-  }, []);
-
-  const signTransaction = useCallback(async (tx: Transaction) => {
-    const provider = getPhantomProvider();
-    if (!provider?.signTransaction) {
-      throw new Error("Phantom signTransaction not available");
-    }
-    return provider.signTransaction(tx);
-  }, []);
+  const disconnect = useCallback(() => {
+    void logout();
+  }, [logout]);
 
   return (
     <SolanaWalletContext.Provider
       value={{
-        publicKey,
-        isConnected: !!publicKey,
-        isConnecting,
+        publicKey: primarySolanaAddress,
+        isConnected: isAuthenticated && !!primarySolanaAddress,
+        isConnecting: isLoading,
         connect,
         disconnect,
         connection,
@@ -108,17 +93,4 @@ export function useSolanaWallet() {
   const ctx = useContext(SolanaWalletContext);
   if (!ctx) throw new Error("useSolanaWallet must be used within SolanaWalletProvider");
   return ctx;
-}
-
-declare global {
-  interface Window {
-    solana?: {
-      isPhantom?: boolean;
-      connect: (opts?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: PublicKey }>;
-      disconnect: () => Promise<void>;
-      signTransaction: (tx: Transaction) => Promise<Transaction>;
-      on?: (event: string, handler: (key: PublicKey | null) => void) => void;
-      removeListener?: (event: string, handler: (key: PublicKey | null) => void) => void;
-    };
-  }
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link2, Check, Users } from "lucide-react";
 import { referralLinkFor } from "@/lib/referral";
+import { APP_NAME } from "@/lib/constants";
 import { truncateAddress } from "@/lib/utils";
 import type { ReferralStats } from "@/lib/types";
 
@@ -37,7 +38,7 @@ export function ReferralPanel({ walletAddress }: ReferralPanelProps) {
         <h2 className="font-semibold">Referral link</h2>
       </div>
       <p className="mt-1 text-sm text-zinc-500">
-        Share Bountly with your link. Referrals are tracked when new users connect a wallet via
+        Share {APP_NAME} with your link. Referrals are tracked when new users connect a wallet via
         your URL.
       </p>
 

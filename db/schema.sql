@@ -1,4 +1,4 @@
--- Bountly Database Schema (Netlify Database / Postgres)
+-- boomncrash Database Schema (Netlify Database / Postgres)
 -- Run migrations when DATABASE_URL is configured
 
 CREATE TABLE IF NOT EXISTS users (

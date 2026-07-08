@@ -1,4 +1,4 @@
-const REFERRAL_KEY = "bountly_referral";
+const REFERRAL_KEY = "boomncrash_referral";
 
 export function captureReferralFromUrl(): void {
   if (typeof window === "undefined") return;

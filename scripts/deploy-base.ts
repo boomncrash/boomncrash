@@ -29,7 +29,7 @@ async function main() {
     throw new Error(`No USDC address configured for chain ${chainId}`);
   }
 
-  console.log("Deploying Bountly contracts...");
+  console.log("Deploying boomncrash contracts...");
   console.log("Deployer:", deployer.address);
   console.log("Chain ID:", chainId.toString());
   console.log("USDC:", usdcAddress);

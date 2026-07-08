@@ -1,5 +1,5 @@
 import { Bounty, Submission, RallyContribution, Notification, EmailPreferences, Dispute, ReferralAttribution, ReferralStats } from "@/lib/types";
-import { RALLY_CREATOR_SEED_PERCENT } from "@/lib/constants";
+import { RALLY_CREATOR_SEED_PERCENT, APP_NAME } from "@/lib/constants";
 import { generateId } from "@/lib/utils";
 
 class BountyStore {
@@ -30,7 +30,7 @@ class BountyStore {
         id: "bounty-1",
         title: "Quote tweet our product launch thread",
         description:
-          "Quote tweet our official launch announcement with your honest take. Must include #Bountly and tag @bountlyapp.",
+          `Quote tweet our official launch announcement with your honest take. Must include #${APP_NAME} and tag @boomncrash.`,
         deliverables: "Link to your quote tweet. Minimum 50 characters of original commentary.",
         category: "social",
         chain: "base",
@@ -46,7 +46,7 @@ class BountyStore {
         id: "bounty-rally-1",
         title: "Rally: Fund a viral launch video series",
         description:
-          "Help us crowdfund a 5-part USDC-paid video series promoting Bountly globally. Goes live when fully funded.",
+          `Help us crowdfund a 5-part USDC-paid video series promoting ${APP_NAME} globally. Goes live when fully funded.`,
         deliverables: "N/A until funded — backers contribute USDC to the Rally pool.",
         category: "content",
         chain: "base",

@@ -1,10 +1,10 @@
 import { ImageResponse } from "next/og";
 import { getBountyById } from "@/lib/repository";
-import { APP_NAME } from "@/lib/constants";
+import { APP_NAME, APP_TAGLINE } from "@/lib/constants";
 import { formatUsdc } from "@/lib/utils";
 
 export const runtime = "nodejs";
-export const alt = "Bountly bounty";
+export const alt = `${APP_NAME} bounty`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -16,7 +16,7 @@ export default async function Image({ params }: RouteProps) {
   const { id } = await params;
   const bounty = await getBountyById(id);
 
-  const title = bounty?.title ?? "Bounty on Bountly";
+  const title = bounty?.title ?? `Bounty on ${APP_NAME}`;
   const reward = bounty ? formatUsdc(bounty.rewardUsdc) : "$0 USDC";
   const chain = bounty?.chain?.toUpperCase() ?? "USDC";
   const category = bounty?.category?.replace("_", " ") ?? "task";
@@ -75,7 +75,7 @@ export default async function Image({ params }: RouteProps) {
 
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
           <p style={{ fontSize: 64, fontWeight: 700, color: "#34d399", margin: 0 }}>{reward}</p>
-          <p style={{ fontSize: 24, color: "#a1a1aa", margin: 0 }}>Fund tasks. Get paid in USDC.</p>
+          <p style={{ fontSize: 24, color: "#a1a1aa", margin: 0 }}>{APP_TAGLINE}</p>
         </div>
       </div>
     ),

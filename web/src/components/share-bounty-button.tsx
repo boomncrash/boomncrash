@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Share2, Check } from "lucide-react";
 import { useWallet } from "@/components/wallet-context";
 import { useSolanaWallet } from "@/components/solana-wallet-context";
+import { APP_NAME } from "@/lib/constants";
 import { appendReferralToUrl } from "@/lib/referral";
 
 interface ShareBountyButtonProps {
@@ -31,7 +32,7 @@ export function ShareBountyButton({ bountyId, title }: ShareBountyButtonProps) {
 
     if (navigator.share) {
       try {
-        await navigator.share({ title, text: `Check out this bounty on Bountly`, url: shareUrl });
+        await navigator.share({ title, text: `Check out this bounty on ${APP_NAME}`, url: shareUrl });
         return;
       } catch {
         // user cancelled or unsupported

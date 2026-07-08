@@ -1,3 +1,5 @@
+import { APP_NAME, APP_TAGLINE } from "@/lib/constants";
+
 export function emailFooterHtml(unsubscribeToken?: string | null): string {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const unsubscribe = unsubscribeToken
@@ -5,7 +7,7 @@ export function emailFooterHtml(unsubscribeToken?: string | null): string {
          <a href="${appUrl}/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}">Unsubscribe from emails</a>
        </p>`
     : "";
-  return `${unsubscribe}<p style="font-size:12px;color:#888;">Bountly — Fund tasks. Get paid in USDC.</p>`;
+  return `${unsubscribe}<p style="font-size:12px;color:#888;">${APP_NAME} — ${APP_TAGLINE}</p>`;
 }
 
 export function emailFooterText(unsubscribeToken?: string | null): string {
@@ -13,5 +15,5 @@ export function emailFooterText(unsubscribeToken?: string | null): string {
   const line = unsubscribeToken
     ? `\n\nUnsubscribe: ${appUrl}/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`
     : "";
-  return `${line}\n\nBountly — Fund tasks. Get paid in USDC.`;
+  return `${line}\n\n${APP_NAME} — ${APP_TAGLINE}`;
 }

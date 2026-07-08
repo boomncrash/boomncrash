@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/constants";
 import type { NotificationType } from "@/lib/types";
 import { getEmailPreferences, getUnsubscribeToken } from "@/lib/repository";
 import { emailFooterHtml } from "@/lib/email-footer";
@@ -66,10 +67,10 @@ export async function sendUserNotificationEmail(params: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM ?? "Bountly <onboarding@resend.dev>",
+        from: process.env.EMAIL_FROM ?? `${APP_NAME} <onboarding@resend.dev>`,
         to: [prefs.email],
-        subject: `[Bountly] ${params.title}`,
-        html: `<p>${params.message}</p><p><a href="${link}">Open in Bountly</a></p>${emailFooterHtml(unsubscribeToken)}`,
+        subject: `[${APP_NAME}] ${params.title}`,
+        html: `<p>${params.message}</p><p><a href="${link}">Open in ${APP_NAME}</a></p>${emailFooterHtml(unsubscribeToken)}`,
       }),
     });
 

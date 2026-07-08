@@ -1,3 +1,4 @@
+import { APP_NAME } from "@/lib/constants";
 import { generateId } from "@/lib/utils";
 import { getEmailPreferences, upsertEmailPreferences, refreshVerificationToken } from "@/lib/repository";
 import { emailFooterHtml } from "@/lib/email-footer";
@@ -31,10 +32,10 @@ export async function sendVerificationEmail(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM ?? "Bountly <onboarding@resend.dev>",
+        from: process.env.EMAIL_FROM ?? `${APP_NAME} <onboarding@resend.dev>`,
         to: [email],
-        subject: "[Bountly] Verify your email",
-        html: `<p>Confirm your email to receive Bountly alerts.</p>
+        subject: `[${APP_NAME}] Verify your email`,
+        html: `<p>Confirm your email to receive ${APP_NAME} alerts.</p>
                <p><a href="${verifyUrl}">Verify email address</a></p>
                <p>This link expires in 24 hours.</p>
                ${emailFooterHtml()}`,

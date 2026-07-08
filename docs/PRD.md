@@ -1,10 +1,10 @@
-# Bountly PRD v1.0 (Locked)
+# boomncrash PRD v1.0 (Locked)
 
 ## Product Summary
 
 | Field | Value |
 |-------|-------|
-| Name | Bountly |
+| Name | boomncrash |
 | Tagline | Fund tasks. Get paid in USDC. |
 | Pooled bounties | Rally (v1.1) |
 | Scope | Global |

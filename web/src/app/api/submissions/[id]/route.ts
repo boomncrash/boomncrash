@@ -6,7 +6,7 @@ import {
   updateBounty,
 } from "@/lib/repository";
 import { isAdminRequest, adminUnauthorizedResponse } from "@/lib/admin-auth";
-import { isCreatorOfBounty, creatorUnauthorizedResponse } from "@/lib/creator-auth";
+import { isCreatorOfBountyAsync, creatorUnauthorizedResponse } from "@/lib/creator-auth";
 import { applySubmissionReview } from "@/lib/submission-review";
 import { notifySubmissionPaid } from "@/lib/notifications";
 
@@ -25,7 +25,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
   const bounty = await getBountyById(submission.bountyId);
   const isAdmin = isAdminRequest(request);
-  const isCreator = isCreatorOfBounty(request, bounty);
+  const isCreator = await isCreatorOfBountyAsync(request, bounty);
 
   if (body.status === "approved" || body.status === "rejected") {
     if (!isAdmin && !isCreator) {

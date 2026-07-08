@@ -30,7 +30,7 @@ function creatorHeaders(creatorAddress: string): HeadersInit {
 }
 
 export function CreatorPanel({ bounty, submissions }: CreatorPanelProps) {
-  const { address, isConnected, isBaseSepolia, switchToBaseSepolia } = useWallet();
+  const { address, isConnected, isOnBaseNetwork, switchToBaseNetwork } = useWallet();
   const { publicKey, isConnected: isSolanaConnected, connection, signTransaction } =
     useSolanaWallet();
   const [loading, setLoading] = useState<string | null>(null);
@@ -69,7 +69,7 @@ export function CreatorPanel({ bounty, submissions }: CreatorPanelProps) {
       let payoutTxHash: string;
 
       if (canPayBase) {
-        if (!isBaseSepolia) await switchToBaseSepolia();
+        if (!isOnBaseNetwork) await switchToBaseNetwork();
         payoutTxHash = await approveBasePayout({
           escrowAddress: bounty.escrowAddress as Address,
           hunterAddress: submission.hunterAddress as Address,

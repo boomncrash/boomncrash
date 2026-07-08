@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { APP_NAME } from "@/lib/constants";
 import { useSearchParams } from "next/navigation";
 
 export default function VerifyEmailClient() {
@@ -22,7 +23,7 @@ export default function VerifyEmailClient() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "Verification failed");
         setStatus("success");
-        setMessage("Email verified! You'll now receive Bountly alerts.");
+        setMessage(`Email verified! You'll now receive ${APP_NAME} alerts.`);
       })
       .catch((err) => {
         setStatus("error");

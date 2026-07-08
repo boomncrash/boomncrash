@@ -1,7 +1,7 @@
 [package]
 name = "bounty_escrow"
 version = "0.1.0"
-description = "Bountly USDC escrow program for Solana"
+description = "boomncrash USDC escrow program for Solana"
 edition = "2021"
 
 [lib]

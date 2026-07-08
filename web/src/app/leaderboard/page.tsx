@@ -11,7 +11,7 @@ import { formatUsdc, truncateAddress, usdcToLocal } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: `Leaderboard — ${APP_NAME}`,
-  description: "Top hunters ranked by reputation on Bountly. Complete USDC bounties and climb the ranks.",
+  description: `Top hunters ranked by reputation on ${APP_NAME}. Complete USDC bounties and climb the ranks.`,
   openGraph: {
     title: `Leaderboard | ${APP_NAME}`,
     description: "Top hunters ranked by reputation on the global USDC bounty marketplace.",

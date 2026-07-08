@@ -1,6 +1,6 @@
-# Deploy Bountly on Netlify
+# Deploy boomncrash on Netlify
 
-Step-by-step guide to host the Bountly web app on [Netlify](https://www.netlify.com).
+Step-by-step guide to host the boomncrash web app on [Netlify](https://www.netlify.com).
 
 ## Prerequisites
 
@@ -40,7 +40,7 @@ In **Site settings → Environment variables**, add (production + deploy preview
 | `NEXT_PUBLIC_SOLANA_USDC_MINT` | Devnet USDC mint | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
 | `ADMIN_SECRET` | Strong random string | Strong random string |
 | `RESEND_API_KEY` | Resend API key | Resend API key |
-| `EMAIL_FROM` | `Bountly <onboarding@resend.dev>` | Verified domain sender |
+| `EMAIL_FROM` | `boomncrash <onboarding@resend.dev>` | Verified domain sender |
 | `ADMIN_ALERT_EMAIL` | Your ops inbox | Your ops inbox |
 | `NEXT_PUBLIC_ONRAMPER_API_KEY` | Optional | Onramper widget key |
 

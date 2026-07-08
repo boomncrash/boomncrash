@@ -116,6 +116,31 @@ export const referralAttributions = pgTable("referral_attributions", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const accounts = pgTable("accounts", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  displayName: varchar("display_name", { length: 100 }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const accountWallets = pgTable("account_wallets", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  accountId: varchar("account_id", { length: 64 })
+    .notNull()
+    .references(() => accounts.id, { onDelete: "cascade" }),
+  chain: varchar("chain", { length: 20 }).notNull(),
+  address: varchar("address", { length: 100 }).notNull(),
+  encryptedPrivateKey: text("encrypted_private_key"),
+  isPrimary: boolean("is_primary").notNull().default(false),
+  label: varchar("label", { length: 100 }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type DbAccount = typeof accounts.$inferSelect;
+export type DbAccountWallet = typeof accountWallets.$inferSelect;
+
 export type DbBounty = typeof bounties.$inferSelect;
 export type DbSubmission = typeof submissions.$inferSelect;
 export type DbRallyContribution = typeof rallyContributions.$inferSelect;

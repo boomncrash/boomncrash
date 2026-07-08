@@ -6,7 +6,7 @@ import { Check, X, Zap, Users } from "lucide-react";
 import type { Bounty, Submission, Dispute } from "@/lib/types";
 import { truncateAddress, formatUsdc, rallyProgressPercent } from "@/lib/utils";
 
-const ADMIN_SECRET_KEY = "bountly_admin_secret";
+const ADMIN_SECRET_KEY = "boomncrash_admin_secret";
 
 function adminHeaders(): HeadersInit {
   const secret = sessionStorage.getItem(ADMIN_SECRET_KEY);

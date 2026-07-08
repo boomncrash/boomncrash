@@ -1,6 +1,6 @@
 import type { Chain, BountyCategory, BountyStatus, ChainId } from "@/lib/types";
 
-export const APP_NAME = "Bountly";
+export const APP_NAME = "boomncrash";
 export const APP_TAGLINE = "Fund tasks. Get paid in USDC.";
 export const PLATFORM_FEE_BPS = 300; // 3%
 export const DISPUTE_WINDOW_HOURS = 48;

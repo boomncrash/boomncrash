@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useWallet } from "@/components/wallet-context";
 import { useSolanaWallet } from "@/components/solana-wallet-context";
+import { useAuth } from "@/components/auth-context";
 import { BOUNTY_CATEGORIES, CHAINS, PROHIBITED_KEYWORDS, RALLY_CREATOR_SEED_PERCENT } from "@/lib/constants";
 import {
   createBaseEscrow,
@@ -36,14 +37,14 @@ export default function CreateBountyPage() {
     isRally: false,
   });
 
-  const { address, isConnected, isBaseSepolia, switchToBaseSepolia } = useWallet();
+  const { address, isConnected } = useWallet();
   const {
     publicKey: solanaAddress,
     isConnected: isSolanaConnected,
-    connect: connectSolana,
     connection: solanaConnection,
     signTransaction: signSolanaTransaction,
   } = useSolanaWallet();
+  const { login } = useAuth();
   const isSolana = form.chain === "solana";
   const creatorAddress = isSolana ? solanaAddress : address;
   const creatorConnected = isSolana ? isSolanaConnected : isConnected;
@@ -53,7 +54,6 @@ export default function CreateBountyPage() {
   const needsBaseRally = form.chain === "base" && isEscrowConfigured() && form.isRally;
   const needsSolanaEscrow = form.chain === "solana" && isSolanaEscrowConfigured() && !form.isRally;
   const needsSolanaRally = form.chain === "solana" && isSolanaEscrowConfigured() && form.isRally;
-  const needsOnChainBase = needsBaseEscrow || needsBaseRally;
   const creatorSeed = (form.rewardUsdc * RALLY_CREATOR_SEED_PERCENT) / 100;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +62,8 @@ export default function CreateBountyPage() {
     setStatusMessage("");
 
     if (!creatorConnected || !creatorAddress) {
-      setError(isSolana ? "Connect your Phantom wallet first." : "Connect your wallet first.");
+      setError("Sign in to post a bounty.");
+      void login();
       return;
     }
 
@@ -75,18 +76,6 @@ export default function CreateBountyPage() {
     if (category && (form.rewardUsdc < category.minReward || form.rewardUsdc > category.maxReward)) {
       setError(`Reward must be between $${category.minReward} and $${category.maxReward} for ${category.label}.`);
       return;
-    }
-
-    if (needsOnChainBase && !isBaseSepolia) {
-      try {
-        setLoading(true);
-        setStatusMessage("Switching to Base Sepolia...");
-        await switchToBaseSepolia();
-      } catch {
-        setError("Please switch your wallet to Base Sepolia network.");
-        setLoading(false);
-        return;
-      }
     }
 
     setLoading(true);
@@ -148,7 +137,7 @@ export default function CreateBountyPage() {
 
       if (needsSolanaEscrow) {
         setStep("escrow");
-        setStatusMessage("Sign Solana escrow transaction in Phantom...");
+        setStatusMessage("Signing Solana escrow transaction...");
         const { escrowAddress, txSignature } = await createSolanaEscrow({
           connection: solanaConnection,
           creator: new PublicKey(solanaAddress!),
@@ -167,7 +156,7 @@ export default function CreateBountyPage() {
 
       if (needsSolanaRally) {
         setStep("escrow");
-        setStatusMessage("Sign Solana Rally seed transaction in Phantom...");
+        setStatusMessage("Signing Solana Rally seed transaction...");
         const { escrowAddress, txSignature } = await createSolanaRally({
           connection: solanaConnection,
           creator: new PublicKey(solanaAddress!),
@@ -205,16 +194,10 @@ export default function CreateBountyPage() {
 
       {!creatorConnected && (
         <div className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">
-          {isSolana ? (
-            <>
-              Connect Phantom for Solana bounties.{" "}
-              <button type="button" onClick={() => connectSolana()} className="underline">
-                Connect Phantom
-              </button>
-            </>
-          ) : (
-            "Connect your wallet to post a bounty."
-          )}
+          <button type="button" onClick={() => login()} className="underline">
+            Sign in
+          </button>{" "}
+          to post a bounty. Your Base and Solana wallets are created automatically.
         </div>
       )}
 
@@ -229,12 +212,6 @@ export default function CreateBountyPage() {
         <div className="mt-6 rounded-lg border border-purple-500/30 bg-purple-500/10 p-4 text-sm text-purple-200">
           Solana escrow program not deployed yet — bounty saved off-chain. Set{" "}
           <code className="text-emerald-400">NEXT_PUBLIC_SOLANA_PROGRAM_ID</code> after deploying the Anchor program.
-        </div>
-      )}
-
-      {needsBaseEscrow && creatorConnected && !isSolana && !isBaseSepolia && (
-        <div className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">
-          Switch to <strong>Base Sepolia</strong> to lock USDC in escrow. We&apos;ll prompt you on submit.
         </div>
       )}
 

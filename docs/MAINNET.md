@@ -1,4 +1,4 @@
-# Bountly Mainnet Rollout Checklist
+# boomncrash Mainnet Rollout Checklist
 
 Use this when switching from testnet/devnet to production on Base and Solana.
 
@@ -38,7 +38,7 @@ Set in **Site settings → Environment variables** (production context):
 | `NEXT_PUBLIC_SOLANA_USDC_MINT` | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` |
 | `ADMIN_SECRET` | Strong random string |
 | `RESEND_API_KEY` | Resend API key |
-| `EMAIL_FROM` | Verified domain sender, e.g. `Bountly <alerts@bountly.app>` |
+| `EMAIL_FROM` | Verified domain sender, e.g. `boomncrash <alerts@boomncrash.app>` |
 | `ADMIN_ALERT_EMAIL` | Ops inbox |
 
 `NETLIFY_DB_URL` is auto-injected when Netlify Database is enabled.
