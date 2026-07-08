@@ -1,15 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreditCard, ExternalLink, Plus, RefreshCw, Star } from "lucide-react";
+import { Check, Copy, CreditCard, ExternalLink, Plus, RefreshCw, Star } from "lucide-react";
 import { useAuth } from "@/components/auth-context";
 import { useWallet } from "@/components/wallet-context";
 import { CHAINS } from "@/lib/constants";
+import { getSolanaExplorerUrl } from "@/lib/chain-config";
 import { formatUsdc, truncateAddress } from "@/lib/utils";
 import { getUsdcBalance, isEscrowConfigured } from "@/lib/contracts/base-escrow";
 import { isSolanaEscrowConfigured } from "@/lib/contracts/solana-escrow";
 import type { Address } from "viem";
 import { getBaseNetworkLabel } from "@/lib/wallet-ethereum";
+
+function CopyAddressButton({ address, label = "Copy address" }: { address: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={() => void copy()}
+      className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-zinc-300 transition hover:bg-white/5 hover:text-white"
+      aria-label={label}
+    >
+      {copied ? (
+        <>
+          <Check className="h-3.5 w-3.5 text-emerald-400" />
+          Copied
+        </>
+      ) : (
+        <>
+          <Copy className="h-3.5 w-3.5" />
+          Copy
+        </>
+      )}
+    </button>
+  );
+}
 
 export default function WalletPage() {
   const {
@@ -25,6 +57,7 @@ export default function WalletPage() {
   const [usdcBalance, setUsdcBalance] = useState<number | null>(null);
   const [loadingBalance, setLoadingBalance] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [generatingChain, setGeneratingChain] = useState<"base" | "solana" | null>(null);
   const onramperKey = process.env.NEXT_PUBLIC_ONRAMPER_API_KEY;
 
   const primarySolana = wallets.find((w) => w.chain === "solana" && w.isPrimary)?.address;
@@ -86,10 +119,13 @@ export default function WalletPage() {
 
   const handleGenerate = async (chain: "base" | "solana") => {
     setActionError(null);
+    setGeneratingChain(chain);
     try {
       await generateWallet(chain);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to create wallet");
+    } finally {
+      setGeneratingChain(null);
     }
   };
 
@@ -102,52 +138,87 @@ export default function WalletPage() {
 
       <div className="mt-8 space-y-6">
         <section className="rounded-2xl border border-white/10 p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold">Your wallets</h2>
-            <div className="flex gap-2">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="font-semibold">Your wallets</h2>
+              <p className="mt-1 text-sm text-zinc-500">
+                Copy an address to receive funds, or add another wallet below.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
               <button
+                type="button"
                 onClick={() => handleGenerate("base")}
-                className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5"
+                disabled={generatingChain !== null}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/15 px-3 py-2 text-xs font-medium text-emerald-300 transition hover:bg-emerald-500/25 disabled:opacity-50"
               >
-                <Plus className="h-3 w-3" /> Base
+                <Plus className="h-3.5 w-3.5" />
+                {generatingChain === "base" ? "Adding…" : "Add Base wallet"}
               </button>
               <button
+                type="button"
                 onClick={() => handleGenerate("solana")}
-                className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5"
+                disabled={generatingChain !== null}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-purple-500/15 px-3 py-2 text-xs font-medium text-purple-300 transition hover:bg-purple-500/25 disabled:opacity-50"
               >
-                <Plus className="h-3 w-3" /> Solana
+                <Plus className="h-3.5 w-3.5" />
+                {generatingChain === "solana" ? "Adding…" : "Add Solana wallet"}
               </button>
             </div>
           </div>
 
-          <ul className="mt-4 space-y-3">
-            {wallets.map((wallet) => (
-              <li
-                key={wallet.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/5 bg-white/[0.02] p-4"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs uppercase tracking-wide text-zinc-500">{wallet.chain}</span>
-                    {wallet.isPrimary && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">
-                        <Star className="h-3 w-3" /> Primary
-                      </span>
-                    )}
+          {wallets.length === 0 ? (
+            <p className="mt-4 rounded-xl border border-dashed border-white/10 p-6 text-center text-sm text-zinc-500">
+              No wallets yet. Add a Base or Solana wallet to get started.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {wallets.map((wallet) => (
+                <li
+                  key={wallet.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-4"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs uppercase tracking-wide text-zinc-500">{wallet.chain}</span>
+                      {wallet.isPrimary && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">
+                          <Star className="h-3 w-3" /> Primary
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 break-all font-mono text-sm">{wallet.address}</p>
+                    {wallet.label && <p className="text-xs text-zinc-500">{wallet.label}</p>}
                   </div>
-                  <p className="mt-1 font-mono text-sm">{wallet.address}</p>
-                  {wallet.label && <p className="text-xs text-zinc-500">{wallet.label}</p>}
-                </div>
-              </li>
-            ))}
-          </ul>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <CopyAddressButton address={wallet.address} />
+                    <a
+                      href={
+                        wallet.chain === "base"
+                          ? `${CHAINS.base.explorerUrl}/address/${wallet.address}`
+                          : getSolanaExplorerUrl(`/address/${wallet.address}`)
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5"
+                    >
+                      Explorer <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="rounded-2xl border border-white/10 p-6">
           <h2 className="font-semibold">Primary Base wallet</h2>
           {isConnected && address ? (
             <>
-              <p className="mt-2 font-mono text-sm text-emerald-400">{address}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <p className="break-all font-mono text-sm text-emerald-400">{address}</p>
+                <CopyAddressButton address={address} label="Copy Base address" />
+              </div>
               <p className="mt-1 text-sm text-zinc-500">Network: {getBaseNetworkLabel()}</p>
               <div className="mt-4 flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] p-4">
                 <div>
@@ -176,7 +247,10 @@ export default function WalletPage() {
         {primarySolana && (
           <section className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6">
             <h2 className="font-semibold">Primary Solana wallet</h2>
-            <p className="mt-2 font-mono text-sm text-purple-300">{primarySolana}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <p className="break-all font-mono text-sm text-purple-300">{primarySolana}</p>
+              <CopyAddressButton address={primarySolana} label="Copy Solana address" />
+            </div>
             {isSolanaEscrowConfigured() && (
               <p className="mt-3 text-xs text-purple-300">Solana escrow program connected</p>
             )}
