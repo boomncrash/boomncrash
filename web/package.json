@@ -10,7 +10,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "netlify database migrations apply",
     "db:migrate:ci": "node scripts/migrate-if-configured.mjs",
-    "build:netlify": "npm run db:migrate:ci && npm run build"
+    "build:netlify": "npm run build"
   },
   "dependencies": {
     "@netlify/database": "^1.1.0",

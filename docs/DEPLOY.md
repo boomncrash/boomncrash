@@ -23,7 +23,7 @@ Step-by-step guide to host the Bountly web app on [Netlify](https://www.netlify.
 
 1. In the site dashboard: **Extensions → Netlify Database → Enable**
 2. This injects `NETLIFY_DB_URL` automatically
-3. Migrations in `web/netlify/database/migrations/` run on each deploy via `build:netlify`
+3. Migrations in `web/netlify/database/migrations/` are applied **automatically by Netlify during deploy** (not in the build command)
 
 ## 3. Set environment variables
 

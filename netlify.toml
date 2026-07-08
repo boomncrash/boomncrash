@@ -9,7 +9,8 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Provision Netlify Database in the site dashboard; migrations run automatically when NETLIFY_DB_URL is set.
+# Netlify Database: migrations in web/netlify/database/migrations/ are applied
+# automatically by Netlify during deploy — do NOT run them in the build command.
 
 [[headers]]
   for = "/*"
