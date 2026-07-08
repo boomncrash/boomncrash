@@ -101,9 +101,10 @@ Update `NEXT_PUBLIC_SOLANA_PROGRAM_ID` in Netlify env vars, then redeploy the si
 
 | Issue | Fix |
 |-------|-----|
-| Build fails on migrations | Enable Netlify Database; confirm `NETLIFY_DB_URL` is set |
+| Build fails on migrations / `version_id` | Migrations must not run during build — Netlify applies them at deploy. If DB was corrupted, reset the database branch in Netlify Database settings and redeploy |
 | Emails not sending | Verify `RESEND_API_KEY`, `EMAIL_FROM` domain, `NEXT_PUBLIC_APP_URL` |
 | Admin 401 | Match `ADMIN_SECRET` in env and admin UI |
+| In-memory data only | `NETLIFY_DB_URL` missing — enable Netlify Database |
 | Deploy cancelled after function upload | Another deploy superseded it — wait, run only one deploy at a time (see below) |
 
 ### Deploy keeps saying "Command was cancelled"
