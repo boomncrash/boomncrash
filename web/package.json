@@ -36,6 +36,7 @@
     "eslint": "^9.36.0",
     "eslint-config-next": "^15.5.18",
     "netlify-cli": "^26.2.0",
+    "@netlify/plugin-nextjs": "^5.14.5",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2"
   }

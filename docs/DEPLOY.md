@@ -104,7 +104,17 @@ Update `NEXT_PUBLIC_SOLANA_PROGRAM_ID` in Netlify env vars, then redeploy the si
 | Build fails on migrations | Enable Netlify Database; confirm `NETLIFY_DB_URL` is set |
 | Emails not sending | Verify `RESEND_API_KEY`, `EMAIL_FROM` domain, `NEXT_PUBLIC_APP_URL` |
 | Admin 401 | Match `ADMIN_SECRET` in env and admin UI |
-| In-memory data only | `NETLIFY_DB_URL` missing — enable Netlify Database |
+| Deploy cancelled after function upload | Another deploy superseded it — wait, run only one deploy at a time (see below) |
+
+### Deploy keeps saying "Command was cancelled"
+
+This usually means **two deploys ran at once** (e.g. git push + manual "Deploy site"). Netlify cancels the older one.
+
+1. Open **Deploys** — check if a newer deploy shows **Published** (green)
+2. **Do not** click Deploy repeatedly — wait for one to finish
+3. **Site settings → Build & deploy → Continuous deployment** — note if "Cancel in-progress builds" is on (normal for git pushes)
+4. Run **one** deploy: **Deploys → Trigger deploy → Clear cache and deploy site**
+5. Leave the tab open until status is **Published** (~2–3 min)
 | OG images broken | Set `NEXT_PUBLIC_APP_URL` to production URL |
 
 ## Related docs
