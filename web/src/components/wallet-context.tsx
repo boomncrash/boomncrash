@@ -24,6 +24,19 @@ interface WalletContextValue {
 
 const WalletContext = createContext<WalletContextValue | null>(null);
 
+const noopWallet: WalletContextValue = {
+  address: null,
+  chainId: null,
+  isConnected: false,
+  isConnecting: false,
+  isOnBaseNetwork: false,
+  isBaseSepolia: false,
+  connect: async () => {},
+  disconnect: () => {},
+  switchToBaseNetwork: async () => {},
+  switchToBaseSepolia: async () => {},
+};
+
 export function WalletProvider({ children }: { children: ReactNode }) {
   const {
     isAuthenticated,
@@ -65,6 +78,5 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
 export function useWallet() {
   const ctx = useContext(WalletContext);
-  if (!ctx) throw new Error("useWallet must be used within WalletProvider");
-  return ctx;
+  return ctx ?? noopWallet;
 }

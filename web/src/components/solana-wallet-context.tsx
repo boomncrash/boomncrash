@@ -25,6 +25,58 @@ interface SolanaWalletContextValue {
 
 const SolanaWalletContext = createContext<SolanaWalletContextValue | null>(null);
 
+const noopSolanaWallet: SolanaWalletContextValue = {
+  publicKey: null,
+  isConnected: false,
+  isConnecting: false,
+  connect: async () => {},
+  disconnect: () => {},
+  connection: new Connection(getActiveChain("solana").rpcUrl, "confirmed"),
+  signTransaction: async () => {
+    throw new Error("Sign in to use your Solana wallet.");
+  },
+};
+
+export function NoopSolanaWalletProvider({ children }: { children: ReactNode }) {
+  const {
+    isAuthenticated,
+    isLoading,
+    primarySolanaAddress,
+    login,
+    logout,
+  } = useAuth();
+
+  const solanaChain = getActiveChain("solana");
+  const connection = useMemo(
+    () => new Connection(solanaChain.rpcUrl, "confirmed"),
+    [solanaChain.rpcUrl]
+  );
+
+  const connect = useCallback(async () => {
+    await login();
+  }, [login]);
+
+  const disconnect = useCallback(() => {
+    void logout();
+  }, [logout]);
+
+  return (
+    <SolanaWalletContext.Provider
+      value={{
+        publicKey: primarySolanaAddress,
+        isConnected: isAuthenticated && !!primarySolanaAddress,
+        isConnecting: isLoading,
+        connect,
+        disconnect,
+        connection,
+        signTransaction: noopSolanaWallet.signTransaction,
+      }}
+    >
+      {children}
+    </SolanaWalletContext.Provider>
+  );
+}
+
 export function SolanaWalletProvider({ children }: { children: ReactNode }) {
   const {
     isAuthenticated,
@@ -91,6 +143,5 @@ export function SolanaWalletProvider({ children }: { children: ReactNode }) {
 
 export function useSolanaWallet() {
   const ctx = useContext(SolanaWalletContext);
-  if (!ctx) throw new Error("useSolanaWallet must be used within SolanaWalletProvider");
-  return ctx;
+  return ctx ?? noopSolanaWallet;
 }
