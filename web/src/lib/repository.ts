@@ -25,6 +25,26 @@ import type {
 import { computeHunterProfile } from "@/lib/profile";
 import { buildLeaderboard } from "@/lib/leaderboard";
 
+function isMissingRelationError(err: unknown): boolean {
+  const check = (e: unknown) => {
+    const code = (e as { code?: string })?.code;
+    const message = e instanceof Error ? e.message : String(e);
+    return code === "42P01" || message.includes("does not exist");
+  };
+  if (check(err)) return true;
+  const cause = (err as { cause?: unknown })?.cause;
+  return cause ? check(cause) : false;
+}
+
+async function withDbRead<T>(fallback: T, run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (err) {
+    if (isMissingRelationError(err)) return fallback;
+    throw err;
+  }
+}
+
 function rowToBounty(row: typeof bounties.$inferSelect): Bounty {
   return {
     id: row.id,
@@ -77,16 +97,17 @@ function rowToSubmission(row: typeof submissions.$inferSelect): Submission {
 }
 
 async function seedDatabaseIfEmpty() {
-  const db = getDb();
-  const [{ count }] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(bounties);
+  try {
+    const db = getDb();
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(bounties);
 
-  if (count > 0) return;
+    if (count > 0) return;
 
-  const samples = store.getAll();
-  for (const b of samples) {
-    await db.insert(bounties).values({
+    const samples = store.getAll();
+    for (const b of samples) {
+      await db.insert(bounties).values({
       id: b.id,
       title: b.title,
       description: b.description,
@@ -107,6 +128,9 @@ async function seedDatabaseIfEmpty() {
       createdAt: new Date(b.createdAt),
       updatedAt: new Date(b.updatedAt),
     });
+    }
+  } catch (err) {
+    if (!isMissingRelationError(err)) throw err;
   }
 }
 
@@ -120,22 +144,24 @@ export async function getBounties(filters?: {
     return store.getAll(filters);
   }
 
-  await seedDatabaseIfEmpty();
+  return withDbRead([], async () => {
+    await seedDatabaseIfEmpty();
 
-  const db = getDb();
-  const conditions = [];
-  if (filters?.chain) conditions.push(eq(bounties.chain, filters.chain));
-  if (filters?.category) conditions.push(eq(bounties.category, filters.category));
-  if (filters?.status) conditions.push(eq(bounties.status, filters.status));
-  if (filters?.rally) conditions.push(eq(bounties.isRally, true));
+    const db = getDb();
+    const conditions = [];
+    if (filters?.chain) conditions.push(eq(bounties.chain, filters.chain));
+    if (filters?.category) conditions.push(eq(bounties.category, filters.category));
+    if (filters?.status) conditions.push(eq(bounties.status, filters.status));
+    if (filters?.rally) conditions.push(eq(bounties.isRally, true));
 
-  const rows = await db
-    .select()
-    .from(bounties)
-    .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(desc(bounties.createdAt));
+    const rows = await db
+      .select()
+      .from(bounties)
+      .where(conditions.length ? and(...conditions) : undefined)
+      .orderBy(desc(bounties.createdAt));
 
-  return rows.map(rowToBounty);
+    return rows.map(rowToBounty);
+  });
 }
 
 export async function getBountyById(id: string): Promise<Bounty | undefined> {
@@ -235,16 +261,18 @@ export async function getSubmissions(bountyId?: string): Promise<Submission[]> {
     return store.getSubmissions(bountyId);
   }
 
-  const db = getDb();
-  const rows = bountyId
-    ? await db
-        .select()
-        .from(submissions)
-        .where(eq(submissions.bountyId, bountyId))
-        .orderBy(desc(submissions.createdAt))
-    : await db.select().from(submissions).orderBy(desc(submissions.createdAt));
+  return withDbRead([], async () => {
+    const db = getDb();
+    const rows = bountyId
+      ? await db
+          .select()
+          .from(submissions)
+          .where(eq(submissions.bountyId, bountyId))
+          .orderBy(desc(submissions.createdAt))
+      : await db.select().from(submissions).orderBy(desc(submissions.createdAt));
 
-  return rows.map(rowToSubmission);
+    return rows.map(rowToSubmission);
+  });
 }
 
 export async function getSubmissionById(id: string): Promise<Submission | undefined> {
@@ -501,9 +529,14 @@ export async function getAllRallyContributions(): Promise<RallyContribution[]> {
     return store.getAllRallyContributions();
   }
 
-  const db = getDb();
-  const rows = await db.select().from(rallyContributions).orderBy(desc(rallyContributions.createdAt));
-  return rows.map(rowToRallyContribution);
+  return withDbRead([], async () => {
+    const db = getDb();
+    const rows = await db
+      .select()
+      .from(rallyContributions)
+      .orderBy(desc(rallyContributions.createdAt));
+    return rows.map(rowToRallyContribution);
+  });
 }
 
 export async function getLeaderboard(limit = 50): Promise<HunterProfile[]> {
